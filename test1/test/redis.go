@@ -2,11 +2,17 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"sync"
 	"time"
 
 	redis "github.com/go-redis/redis"
 )
+
+type valueRedis struct {
+	Key   string
+	Value string
+}
 
 var (
 	client = &redisClient{}
@@ -16,7 +22,7 @@ type redisClient struct {
 	c *redis.Client
 }
 
-func initialize(wg *sync.WaitGroup) *redisClient {
+func initialize() *redisClient {
 	c := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",
@@ -48,4 +54,19 @@ func (client *redisClient) setKey(key string, value interface{}, expiration time
 		return err
 	}
 	return nil
+}
+
+func main() {
+	var wg sync.WaitGroup
+	wg.Add(2)
+	login := initialize()
+	key := "1"
+	value := &valueRedis{Key: "CROSSCHEK_TRANSACTION_DEBIT_27_09_2021", Value: "22222_0"}
+	// value2 := &valueRedis{}
+	go login.setKey(key, value, time.Minute*1)
+	go login.getKey(key, value)
+	log.Printf("Key : %s", value.Key)
+	log.Printf("Value :%s", value.Value)
+
+	wg.Wait()
 }

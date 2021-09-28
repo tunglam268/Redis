@@ -1,4 +1,4 @@
-module test1
+module github.com/tunglam268/Redis
 
 go 1.17
 
